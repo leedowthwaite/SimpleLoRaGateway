@@ -21,8 +21,6 @@ void configureBoard() {
   
   Serial.printf("ESP32 Chip ID = %04X",(uint16_t)(_chipID>>32));  //print High 2 bytes
   Serial.printf("%08X\n",(uint32_t)_chipID);                      //print Low 4bytes.
-  
-  //LoRa.dumpRegisters(Serial);
 #endif
 }
 

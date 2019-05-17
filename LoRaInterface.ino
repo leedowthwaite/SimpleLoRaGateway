@@ -13,12 +13,15 @@
 //#define ENA_TRANSMIT
 
 #define USE_SPREAD_FACTOR 
+static int _spreadFactor = MIN_SPREAD_FACTOR;
 
+
+#ifdef ENA_TRANSMIT
 // transmission parameters
 #define SEND_INTERVAL (1000)
 static long _lastSendTime = 0;
-static int _txSpreadFactor = 7;
 static uint32_t _txCounter = 0;
+#endif
 
 // LoRa receive buffers
 static bool _receivedFlag = false;
@@ -29,13 +32,20 @@ static struct LoRaPacket _rxPacket;
 
 void configureLoRa() {
   Serial.println("configureLoRa()");
-  LoRa.setTxPowerMax(20);
-  LoRa.setSpreadingFactor(_txSpreadFactor);
+#ifdef ENA_TRANSMIT
+  LoRa.setTxPowerMax(MAX_TX_POWER);
+#endif
+#ifdef USE_SPREAD_FACTOR  
+  LoRa.setSpreadingFactor(_spreadFactor);
+#endif
   LoRa.onReceive(onReceive);
   LoRa.receive();
 }
 
-// LoRa receiver ISR
+// LoRa receiver
+
+// receiver ISR
+//
 void onReceive(int packetSize)
 {
   // Keep this short and sweet - it's an interrupt service routine
@@ -49,28 +59,9 @@ void onReceive(int packetSize)
   digitalWrite(LED_BUILTIN, LOW);
 }
 
-
-
-#define MIN_SPREAD_FACTOR (7)   // technically it's 6 but in EU band all channels use 7-12
-#define MAX_SPREAD_FACTOR (12)
-
 void setDefaultSpread() {
   LoRa.setSpreadingFactor(MIN_SPREAD_FACTOR);
 }
-/*
-void updateTxMode() {
-  if (++_txSpreadFactor > MAX_SPREAD_FACTOR) {
-    _txSpreadFactor = MIN_SPREAD_FACTOR;
-  }
-  LoRa.setSpreadingFactor(_txSpreadFactor);
-
-  Serial.print("set spread factor to ");
-  Serial.println(String(_txSpreadFactor));
-
-  clearDisplay();
-  displaySpreadFactor(_txSpreadFactor);
-}
-*/
 
 // LoRa transmitter
 
@@ -88,15 +79,13 @@ void sendIfReady() {
   if(millis() - _lastSendTime > SEND_INTERVAL)
   {
     digitalWrite(LED_BUILTIN, HIGH);
-    //setTestSpread();
     sendTestPacket();
-    //setDefaultSpread();
     _lastSendTime = millis();
 
     clearDisplay();
     displayString(0, 0, "sent packet ");
     displayString(8, 0, (const char *)String(_txCounter-1).c_str());
-    displaySpreadFactor(_txSpreadFactor);
+    displaySpreadFactor(_spreadFactor);
     
     digitalWrite(LED_BUILTIN, LOW);
   }
@@ -118,9 +107,4 @@ struct LoRaPacket *checkRxBuffer() {
   } else {
     return NULL;
   }
-}
-
-void updateLoRa() {
-  // ensure LoRa radio is receiving
-  LoRa.receive();
 }

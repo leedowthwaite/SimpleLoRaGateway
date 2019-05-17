@@ -12,19 +12,9 @@
 #include "HAL.h"
 #include "LoRaInterface.h"
 
-//#define HELTEC
-
-/*
-void checkButton() {
-  if (digitalRead(BTN_PROG) == 0) {
-    updateTxMode();
-    //clearDisplay();
-    //displaySpreadFactor();
-    delay(250);
-  }
-}
-*/
-
+// checkAndForwardPackets()
+// This is the core function that checks for received LoRa packets and forwards the contents on to MQTT
+//
 static void checkAndForwardPackets() {
   // check for received data
   struct LoRaPacket *rxPacket = checkRxBuffer();
@@ -41,7 +31,6 @@ static void checkAndForwardPackets() {
     displayString(10, 0, msg);
     displayRssi(rxPacket->rssi);
   }
-
 }
 
 // Arduino main hooks
@@ -54,7 +43,6 @@ void setup() {
   Serial.println("setup()");
 
   pinMode(LED_BUILTIN, OUTPUT);
-  //pinMode(BTN_PROG, INPUT);
 
   clearDisplay();
   displayString(0, 0, "Initialising GATEWAY...");
@@ -77,16 +65,11 @@ void loop() {
   // ensure WiFi stays connected
   checkWiFiStatus();
 
+  // Perform packet forwarding
   checkAndForwardPackets();
   
   // MQTT housekeeping
   updateMQTT();
-
-  updateLoRa();
-
-  // UI housekeeping
-//  checkButton();
-//  updateDisplay();  
 
   delay(100);
 }
