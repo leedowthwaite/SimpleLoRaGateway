@@ -9,7 +9,7 @@
 #include "WiFi.h"
 
 // WiFi Credentials
-static const char* kSSID = "";
+static const char* kSSID = "NETGEAR-24";
 static const char* kPASSWORD = "";
 
 // WiFi status

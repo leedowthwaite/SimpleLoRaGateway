@@ -16,7 +16,6 @@
 #define MAX_TX_POWER      (20)
 
 struct LoRaPacket {
-  //const char payload[MAX_LORA_PAYLOAD];
   String  payload;
   int     index;
   int     rssi;

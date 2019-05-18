@@ -50,11 +50,13 @@ void onReceive(int packetSize)
 {
   // Keep this short and sweet - it's an interrupt service routine
   digitalWrite(LED_BUILTIN, HIGH);
+  // Copy LoRa payload into buffer 
   _payloadBuffer = "";
   while (LoRa.available())
   {
     _payloadBuffer += (char) LoRa.read();
   }
+  // set flag to say there's data ready
   _receivedFlag = true;
   digitalWrite(LED_BUILTIN, LOW);
 }
