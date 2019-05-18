@@ -8,11 +8,13 @@
 
 #include "WiFi.h"
 
+/*
 // MQTT Configuration
 // if you have a hostname set for the MQTT broker, you can use it here
 //const char *serverHostname = "mqtt-server";
 // otherwise you can use an IP address like this
 static const IPAddress serverIPAddress(192, 168, 0, 2);
+*/
 
 // the topic we want to use
 static const char *_topic = "env/node1/temp";
@@ -24,13 +26,21 @@ static PubSubClient _mqttClient(_wifiClient);
 
 // MQTT Setup
 
-// connect to MQTT server
+// connect to MQTT server using IP address and port
+//
+void connectToMQTTServer(IPAddress addr, uint16_t port) {
+  _mqttClient.setServer(addr, port);
+  connectMQTT();
+}
+
+// connect to MQTT server using host and port
+//
+void connectToMQTTServer(const char *host, uint16_t port) {
+  _mqttClient.setServer(host, port);
+  connectMQTT();
+}
+
 void connectMQTT() {
-
-  // connect to MQTT server  
-  //_mqttClient.setServer(serverHostname, 1883);
-  _mqttClient.setServer(serverIPAddress, 1883);
-
   // Wait until we're connected
   while (!_mqttClient.connected()) {
     // Create a unique MQTT client ID of form LoRa-Gateway-XXXX, where the XXXX is the Heltec chip ID.

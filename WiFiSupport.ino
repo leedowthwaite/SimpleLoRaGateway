@@ -9,54 +9,47 @@
 #include "WiFi.h"
 
 // WiFi Credentials
-static const char *kSSID = "******";
-static const char *kPASSWORD = "******";
+static const char *_ssid = NULL;
+static const char *_password = NULL;
 
 // WiFi status
-static bool _wifiConnected = false;
+//static bool _wifiConnected = false;
 
 // connect to wifi – returns true if successful or false if not
 //
-static boolean connectWifi() {
-  boolean state = true;
+static boolean connectWifi(const char *ssid, const char *password) {
+  boolean success = true;
   int i = 0;
 
   WiFi.disconnect(true);
   delay(500);
   WiFi.mode(WIFI_STA);
   WiFi.setAutoConnect(true);
-  WiFi.begin(kSSID, kPASSWORD);
+  WiFi.begin(ssid, password);
   displayString(0, 0, "Connecting to WiFi...");
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
     if (i > 10) {
-      state = false;
+      success = false;
       break;
     }
     i++;
   }
-
-  if (state) {
-    Serial.print("Connected to ");
-    Serial.println(kSSID);
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-  }
-  else {
-    Serial.println("Connection failed.");
-  }
-
-  return state;
+  return success;
 }
+
+bool isWiFiConnected() {
+  return WiFi.status() == WL_CONNECTED;
+}
+
 
 static void displayConnectionStatus() {
   clearDisplay();
-  if (_wifiConnected) {
+  if (isWiFiConnected()) {
     displayString(0, 0, "Connected to:");
-    displayString(0, 1, kSSID);
+    displayString(0, 1, _ssid);
     displayString(0, 2, "IP address:");
     displayString(0,3, String(WiFi.localIP()).c_str());
   } else {
@@ -65,19 +58,24 @@ static void displayConnectionStatus() {
 }
 
 
-void initWiFi() {
-  _wifiConnected = connectWifi();
+void initWiFi(const char *ssid, const char *password) {
+  if (connectWifi(ssid, password)) {
+    _ssid = ssid;
+    _password = password;
+    Serial.print("Connected to ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("Connection failed.");
+  }
   displayConnectionStatus();
   delay(1000);
 }
 
-bool isWiFiConnected() {
-  return _wifiConnected;
-}
-
 void checkWiFiStatus() {
-  if (!_wifiConnected) {
-    _wifiConnected = connectWifi();
+  if (!isWiFiConnected() && _ssid && _password) {
+    connectWifi(_ssid, _password);
     displayConnectionStatus();
     delay(1000);
   }

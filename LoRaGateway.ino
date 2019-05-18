@@ -12,6 +12,16 @@
 #include "HAL.h"
 #include "LoRaInterface.h"
 
+// WiFi credentials
+#define WIFI_SSID     "*****"
+#define WIFI_PASSWORD "*****"
+
+// MQTT Broker info
+// Define either an IP address...
+//#define MQTT_SERVER   IPAddress(192, 168, 0, 2)
+// ...or a hostname
+#define MQTT_SERVER   "Mac-mini"
+
 // checkAndForwardPackets()
 // This is the core function that checks for received LoRa packets and forwards the contents on to MQTT
 //
@@ -49,13 +59,13 @@ void setup() {
   displayString(0, 0, "Initialising Gateway...");
 
   // Initialise wifi connection
-  initWiFi();
+  initWiFi(WIFI_SSID, WIFI_PASSWORD);
   
   // Configure LoRa interface
   configureLoRa();
 
   if (isWiFiConnected()) {
-    connectMQTT();
+    connectToMQTTServer(MQTT_SERVER, 1883);
   }
   Serial.println("setup() done");
 }
