@@ -15,7 +15,6 @@
 #define USE_SPREAD_FACTOR 
 static int _spreadFactor = MIN_SPREAD_FACTOR;
 
-
 #ifdef ENA_TRANSMIT
 // transmission parameters
 #define SEND_INTERVAL (1000)
@@ -26,7 +25,6 @@ static uint32_t _txCounter = 0;
 // LoRa receive buffers
 static bool _receivedFlag = false;
 static String _payloadBuffer = "";
-static struct LoRaPacket _rxPacket;
 
 // LoRa Handling
 
@@ -44,9 +42,15 @@ void configureLoRa() {
 
 // LoRa receiver
 
+// received signal strength
+//
+int rssi() {
+  return LoRa.packetRssi();
+}
+
 // receiver ISR
 //
-void onReceive(int packetSize)
+static void onReceive(int packetSize)
 {
   // Keep this short and sweet - it's an interrupt service routine
   digitalWrite(LED_BUILTIN, HIGH);
@@ -95,17 +99,17 @@ void sendIfReady() {
 
 #endif
 
-struct LoRaPacket *checkRxBuffer() {
+// Check for recent incoming LoRa payload and copy it from the rxbuffer and pass it onto the caller.
+//
+String *checkRxBuffer() {
+  static String payload;
   if (_receivedFlag && _payloadBuffer.length() > 0) {
     _receivedFlag = false;
     // ensure length does not exceed maximum
     int len = min((int)_payloadBuffer.length(), MAX_LORA_PAYLOAD-1);
-    // copy String from rx buffer to packet struct
-    _rxPacket.payload = _payloadBuffer;
-    ++_rxPacket.index;
-    _rxPacket.rssi = LoRa.packetRssi();
-    // return ptr to caller
-    return &_rxPacket;
+    // copy String from rx buffer to local static variable for return to caller
+    payload = _payloadBuffer;
+    return &payload;
   } else {
     return NULL;
   }

@@ -15,11 +15,8 @@
 
 #define MAX_TX_POWER      (20)
 
-struct LoRaPacket {
-  String  payload;
-  int     index;
-  int     rssi;
-  LoRaPacket(): payload(""), index(0), rssi(0) {};
-};
+void configureLoRa();
+String *checkRxBuffer();
+int rssi();
 
 #endif //  __LORA_INTERFACE

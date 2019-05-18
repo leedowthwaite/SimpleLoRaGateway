@@ -17,19 +17,20 @@
 //
 static void checkAndForwardPackets() {
   // check for received data
-  struct LoRaPacket *rxPacket = checkRxBuffer();
-  if (rxPacket) {
+  String *rxPacketString = checkRxBuffer();
+  if (rxPacketString) {
     // forward packet content to MQTT
-    const char *msg = rxPacket->payload.c_str();
+    const char *msg = rxPacketString->c_str();
+  
     publishMQTT(msg);
 
     Serial.print("rx packet: msg: ");
     Serial.println(msg);
 
     clearDisplay();
-    displayString(0, 0, "received packet ");
-    displayString(10, 0, msg);
-    displayRssi(rxPacket->rssi);
+    displayString(0, 0, "received msg: ");
+    displayString(8, 0, msg);
+    displayRssi(rssi());
   }
 }
 
@@ -45,7 +46,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   clearDisplay();
-  displayString(0, 0, "Initialising GATEWAY...");
+  displayString(0, 0, "Initialising Gateway...");
 
   // Initialise wifi connection
   initWiFi();
